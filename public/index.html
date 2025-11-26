@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISO 12100 Document Agent Chat</title>
+  <script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js" async></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      padding: 1rem;
+      background: #003366;
+      color: #fff;
+    }
+    #chat-container {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ISO 12100 Document Agent Chat</h1>
+  </header>
+  <div id="chat-container"></div>
+  <script>
+    window.chatkitIsLoaded = new Promise((resolve) => {
+      if (window.chatkit) {
+        resolve();
+      } else {
+        window.addEventListener('chatkit#load', resolve);
+      }
+    });
+    async function getClientSecret(deviceId) {
+      const response = await fetch('/api/chatkit/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId: deviceId })
+      });
+      const data = await response.json();
+      return data.client_secret;
+    }
+    async function startChat() {
+      await window.chatkitIsLoaded;
+      const deviceId = (crypto.randomUUID && crypto.randomUUID()) ||
+        Math.random().toString(36).substring(2);
+      const clientSecret = await getClientSecret(deviceId);
+      window.chatkit.createChat({
+        clientSecret: clientSecret,
+        workflow: { id: 'wf_692605e459d481909eb01292c1ae28e307b2a2a9ee1d324' },
+        selector: '#chat-container'
+      });
+    }
+    startChat().catch((err) => {
+      console.error('Failed to start ChatKit:', err);
+    });
+  </script>
+</body>
+</html>
